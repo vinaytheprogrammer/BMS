@@ -7,50 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let books = [];
     
-    
-    // const books = [
-    //   {
-    //     title: "To Kill a Mockingbird",
-    //     author: "Harper Lee",
-    //     isbn: "1234567890",
-    //     pubDate: "1960-07-11",
-    //     genre: "fiction",
-    //     age: new Date().getFullYear() - 1960,
-    //   },
-    //   {
-    //     title: "1984",
-    //     author: "George Orwell",
-    //     isbn: "2345678901",
-    //     pubDate: "1949-06-08",
-    //     genre: "fiction",
-    //     age: new Date().getFullYear() - 1949,
-    //   },
-    //   {
-    //     title: "The Great Gatsby",
-    //     author: "F. Scott Fitzgerald",
-    //     isbn: "3456789012",
-    //     pubDate: "1925-04-10",
-    //     genre: "fiction",
-    //     age: new Date().getFullYear() - 1925,
-    //   },
-    //   {
-    //     title: "Sapiens: A Brief History of Humankind",
-    //     author: "Yuval Noah Harari",
-    //     isbn: "4567890123",
-    //     pubDate: "2011-01-01",
-    //     genre: "non-fiction",
-    //     age: new Date().getFullYear() - 2011,
-    //   },
-    //   {
-    //     title: "The Hobbit",
-    //     author: "J.R.R. Tolkien",
-    //     isbn: "5678901234",
-    //     pubDate: "1937-09-21",
-    //     genre: "fantasy",
-    //     age: new Date().getFullYear() - 1937,
-    //   },
-    // ];
-    
     const fetchBooks = async () => {
       try {
         const response = await fetch(apiUrl);
@@ -59,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const booksObject = await response.json();
         books = Object.values(booksObject);
+        filteredBooks = [...books];
         updateBookDisplay();
       } catch (error) {
         console.error('Error fetching books:', error);
@@ -66,10 +23,43 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
+// Filter books based on user input
+    const filterBooks = () => {
+      const searchTerm = document.getElementById('searchTerm').value.toLowerCase();
+      const filterGenre = document.getElementById('filterGenre').value;
+      const filterYear = document.getElementById('filterYear').value;
 
+      books = books.filter(book => {
+        const matchesSearch = searchTerm
+          ? book.title.toLowerCase().includes(searchTerm) ||
+            book.author.toLowerCase().includes(searchTerm)
+          : true;
+        const matchesGenre = filterGenre ? book.genre === filterGenre : true;
+        const matchesYear = filterYear
+          ? new Date(book.pubDate).getFullYear() === parseInt(filterYear, 10)
+          : true;
 
-  // Initialize by fetching books
-  fetchBooks();
+        return matchesSearch && matchesGenre && matchesYear;
+      });
+
+      updateBookDisplay();
+    };
+    // Add event listener for filters
+    document.getElementById('applyFilters').addEventListener('click', filterBooks);
+
+    // Reset filters and display all books
+    const resetFilters = () => {
+      document.getElementById('searchTerm').value = '';
+      document.getElementById('filterGenre').value = '';
+      document.getElementById('filterYear').value = '';
+      fetchBooks();
+      books = [...books];
+      
+      updateBookDisplay();
+    };
+    document.getElementById('resetFilters').addEventListener('click', resetFilters);
+    // Initialize by fetching books
+    fetchBooks();
 
 
     const updateBookDisplay = () => {
