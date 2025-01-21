@@ -2,52 +2,76 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('#addBookForm');
     const bookCountDiv = document.getElementById('bookCount');
     const bookListDiv = document.getElementById('bookList');
-  
-    // const books = [];
-    const books = [
-      {
-        title: "To Kill a Mockingbird",
-        author: "Harper Lee",
-        isbn: "1234567890",
-        pubDate: "1960-07-11",
-        genre: "fiction",
-        age: new Date().getFullYear() - 1960,
-      },
-      {
-        title: "1984",
-        author: "George Orwell",
-        isbn: "2345678901",
-        pubDate: "1949-06-08",
-        genre: "fiction",
-        age: new Date().getFullYear() - 1949,
-      },
-      {
-        title: "The Great Gatsby",
-        author: "F. Scott Fitzgerald",
-        isbn: "3456789012",
-        pubDate: "1925-04-10",
-        genre: "fiction",
-        age: new Date().getFullYear() - 1925,
-      },
-      {
-        title: "Sapiens: A Brief History of Humankind",
-        author: "Yuval Noah Harari",
-        isbn: "4567890123",
-        pubDate: "2011-01-01",
-        genre: "non-fiction",
-        age: new Date().getFullYear() - 2011,
-      },
-      {
-        title: "The Hobbit",
-        author: "J.R.R. Tolkien",
-        isbn: "5678901234",
-        pubDate: "1937-09-21",
-        genre: "fantasy",
-        age: new Date().getFullYear() - 1937,
-      },
-    ];
+
+    const apiUrl = './books.json'; // Path to your JSON file
     
-  
+    let books = [];
+    
+    
+    // const books = [
+    //   {
+    //     title: "To Kill a Mockingbird",
+    //     author: "Harper Lee",
+    //     isbn: "1234567890",
+    //     pubDate: "1960-07-11",
+    //     genre: "fiction",
+    //     age: new Date().getFullYear() - 1960,
+    //   },
+    //   {
+    //     title: "1984",
+    //     author: "George Orwell",
+    //     isbn: "2345678901",
+    //     pubDate: "1949-06-08",
+    //     genre: "fiction",
+    //     age: new Date().getFullYear() - 1949,
+    //   },
+    //   {
+    //     title: "The Great Gatsby",
+    //     author: "F. Scott Fitzgerald",
+    //     isbn: "3456789012",
+    //     pubDate: "1925-04-10",
+    //     genre: "fiction",
+    //     age: new Date().getFullYear() - 1925,
+    //   },
+    //   {
+    //     title: "Sapiens: A Brief History of Humankind",
+    //     author: "Yuval Noah Harari",
+    //     isbn: "4567890123",
+    //     pubDate: "2011-01-01",
+    //     genre: "non-fiction",
+    //     age: new Date().getFullYear() - 2011,
+    //   },
+    //   {
+    //     title: "The Hobbit",
+    //     author: "J.R.R. Tolkien",
+    //     isbn: "5678901234",
+    //     pubDate: "1937-09-21",
+    //     genre: "fantasy",
+    //     age: new Date().getFullYear() - 1937,
+    //   },
+    // ];
+    
+    const fetchBooks = async () => {
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const booksObject = await response.json();
+        books = Object.values(booksObject);
+        updateBookDisplay();
+      } catch (error) {
+        console.error('Error fetching books:', error);
+        bookListDiv.textContent = 'Failed to load book data.';
+      }
+    };
+
+
+
+  // Initialize by fetching books
+  fetchBooks();
+
+
     const updateBookDisplay = () => {
       bookCountDiv.textContent = `Number of books: ${books.length}`;
   
@@ -66,6 +90,18 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         table.appendChild(headerRow);
   
+        // Function to calculate the age of a book
+        const calculateBookAge = (pubDate) => {
+          const publicationYear = new Date(pubDate).getFullYear();
+          const currentYear = new Date().getFullYear();
+          return currentYear - publicationYear;
+        };
+
+        // Loop through the books array and add the age property
+        books.forEach(book => {
+          book.age = calculateBookAge(book.pubDate);
+        });
+
         books.forEach(book => {
           const row = document.createElement('tr');
           row.innerHTML = `
@@ -108,8 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         author,
         isbn,
         pubDate,
-        genre,
-        age: calculateBookAge(pubDate)
+        genre
       };
       books.push(book);
   
@@ -118,12 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
       updateBookDisplay();
       form.reset();
     });
-  
-    const calculateBookAge = (pubDate) => {
-      const publicationYear = new Date(pubDate).getFullYear();
-      const currentYear = new Date().getFullYear();
-      return currentYear - publicationYear;
-    };
   
     window.handleEdit = () => {
       const isbn = document.getElementById('editIsbn').value.trim();
