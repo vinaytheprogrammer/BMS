@@ -15,10 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const booksObject = await response.json();
         books = Object.values(booksObject);
-        filteredBooks = [...books];
         updateBookDisplay();
       } catch (error) {
-        console.error('Error fetching books:', error);
+        toastr.error('Error fetching books:', error);
         bookListDiv.textContent = 'Failed to load book data.';
       }
     };
@@ -28,7 +27,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const searchTerm = document.getElementById('searchTerm').value.toLowerCase();
       const filterGenre = document.getElementById('filterGenre').value;
       const filterYear = document.getElementById('filterYear').value;
+      
+      // Regular expression to validate strings without special characters
+      const validStringPattern = /^[a-zA-Z0-9\s]+$/;
 
+
+      if (searchTerm && !validStringPattern.test(searchTerm)) {
+        toastr.error('Title must only contain letters, numbers, and spaces.');
+        return;
+      }
+
+      toastr.success("fillter applied successfully")
       books = books.filter(book => {
         const matchesSearch = searchTerm
           ? book.title.toLowerCase().includes(searchTerm) ||
@@ -52,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('searchTerm').value = '';
       document.getElementById('filterGenre').value = '';
       document.getElementById('filterYear').value = '';
+      toastr.success("reset successfully")
       fetchBooks();
       books = [...books];
       
@@ -66,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
       bookCountDiv.textContent = `Number of books: ${books.length}`;
   
       if (books.length === 0) {
-        bookListDiv.textContent = 'No books added yet.';
+        bookListDiv.textContent = 'No Results';
       } else {
         const table = document.createElement('table');
         const headerRow = document.createElement('tr');
@@ -109,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bookListDiv.appendChild(table);
       }
     };
-  
+    
     form.addEventListener('submit', (e) => {
       e.preventDefault();
   
@@ -119,13 +129,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const pubDate = document.getElementById('pub_date').value;
       const genre = document.getElementById('genre').value;
   
+     // Regular expression to validate strings without special characters
+      const validStringPattern = /^[a-zA-Z0-9\s]+$/;
+
       if (!title || !author || !isbn || !pubDate || !genre) {
-        alert('Please fill out all fields.');
+        toastr.error('Please fill out all fields.');
+        return;
+      }
+
+      if (!validStringPattern.test(title)) {
+        toastr.error('Title must only contain letters, numbers, and spaces.');
+        return;
+      }
+
+      if (!validStringPattern.test(author)) {
+        toastr.error('Author must only contain letters, numbers, and spaces.');
         return;
       }
   
       if (isNaN(isbn)) {
-        alert('ISBN must be a number.');
+        toastr.error('ISBN must be a number.');
         return;
       }
   
@@ -138,8 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       books.push(book);
   
-      alert(`${title} has been added.`);
-      console.log('Books:', books);
+      toastr.success(`${title} has been added.`);
       updateBookDisplay();
       form.reset();
     });
@@ -151,9 +173,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const newPubDate = document.getElementById('newPubDate').value;
       const newGenre = document.getElementById('newGenre').value;
   
+      // Regular expression to validate strings without special characters
+      const validStringPattern = /^[a-zA-Z0-9\s]+$/;
+
+
+      if (newTitle && !validStringPattern.test(newTitle)) {
+        toastr.error('Title must only contain letters, numbers, and spaces.');
+        return;
+      }
+    
+      if (newAuthor && !validStringPattern.test(newAuthor)) {
+        toastr.error('Author must only contain letters, numbers, and spaces.');
+        return;
+      }
+
       const bookIndex = books.findIndex(book => book.isbn === isbn);
       if (bookIndex === -1) {
-        alert('Book not found.');
+        toastr.error('Book not found.');
         return;
       }
   
@@ -165,8 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
       books[bookIndex] = { ...books[bookIndex], ...updatedDetails };
   
-      alert('Book updated successfully.');
-      console.log('Books:', books);
+      toastr.success('Book updated successfully.');
+    
       updateBookDisplay();
     };
   
@@ -174,13 +210,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const isbn = document.getElementById('deleteIsbn').value.trim();
       const bookIndex = books.findIndex(book => book.isbn === isbn);
       if (bookIndex === -1) {
-        alert('Book not found.');
+        toastr.error('Book not found.');
         return;
       }
   
       books.splice(bookIndex, 1);
-      alert('Book deleted successfully.');
-      console.log('Books:', books);
+      toastr.success('Book deleted successfully.');
+     
       updateBookDisplay();
     };
   
@@ -210,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
             )
             .join('');
 
+        toastr.success("Categorize Successfully")
         // Update UI
         const bookListDiv = document.getElementById('bookList1');
         bookListDiv.innerHTML = `
@@ -217,6 +254,16 @@ document.addEventListener('DOMContentLoaded', () => {
             ${categorizedHTML}
         `;
     };
-        
+    
+    // Function to remove categorized books
+    window.removeCategorizedBooks = () => {
+      const bookListDiv = document.getElementById('bookList1');
+      bookListDiv.innerHTML = `
+          <h2>Categorized Books</h2>
+          <p>No categorized books available.</p>
+      `;
+      toastr.success("Categorized books removed successfully");
+    };
+
     updateBookDisplay();
   });

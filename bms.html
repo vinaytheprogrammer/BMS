@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
   <title>Book Management System</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js"></script>
 </head>
 <body>
 
@@ -53,9 +55,8 @@
         <label for="newAuthor">New Author</label>
         <input type="text" id="newAuthor" placeholder="Enter new author (optional)">
 
-        <label for="newPubDate">New Publication Date</label>
+        <label for="newPubDate">New Publication Date (optional)</label>
         <input type="date" id="newPubDate">
-
         <label for="newGenre">New Genre</label>
         <select id="newGenre">
           <option value="">Select Genre (optional)</option>
@@ -83,6 +84,7 @@
       <div class="actions">
         <h2>Categorize Books</h2>
         <button onclick="handleCategorize()">Categorize Books</button>
+        <button onclick="removeCategorizedBooks()">Remove Categories</button>
       </div>
     </div>
 
@@ -120,7 +122,9 @@
     </div>
   </div>
 
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
   <script src="bmsValidation.js"></script>
-
+  
 </body>
 </html>
