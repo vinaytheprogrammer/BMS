@@ -1,7 +1,35 @@
+function showForm(formId) {
+  document.getElementById('formContainer').classList.remove('hidden');
+  document.querySelectorAll('#formContainer > div').forEach(div => div.classList.add('hidden'));
+  document.getElementById(formId).classList.remove('hidden');
+}
+
+function closeForm() {
+document.getElementById('formContainer').classList.add('hidden');
+document.querySelectorAll('#formContainer > div').forEach(div => div.classList.add('hidden'));
+}
+
+document.getElementById('formContainer').addEventListener('click', (e) => {
+if (e.target.id === 'formContainer') {
+  closeForm();
+}
+});
+
+// Event listeners for buttons
+document.querySelectorAll('#formContainer button').forEach(button => {
+button.addEventListener('click', () => {
+  // Close the form container after the button is clicked
+  closeForm();
+});
+});
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('#addBookForm');
     const bookCountDiv = document.getElementById('bookCount');
     const bookListDiv = document.getElementById('bookList');
+    const sortAscButton = document.getElementById('sortAsc');
+    const sortDescButton = document.getElementById('sortDesc');
 
     const apiUrl = './books.json'; // Path to your JSON file
     
@@ -72,54 +100,139 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchBooks();
 
 
-    const updateBookDisplay = () => {
-      bookCountDiv.textContent = `Number of books: ${books.length}`;
-  
-      if (books.length === 0) {
-        bookListDiv.textContent = 'No Results';
-      } else {
-        const table = document.createElement('table');
-        const headerRow = document.createElement('tr');
-        headerRow.innerHTML = `
-          <th>Title</th>
-          <th>Author</th>
-          <th>ISBN</th>
-          <th>Publication Date</th>
-          <th>Genre</th>
-          <th>Age</th>
-        `;
-        table.appendChild(headerRow);
-  
-        // Function to calculate the age of a book
-        const calculateBookAge = (pubDate) => {
-          const publicationYear = new Date(pubDate).getFullYear();
-          const currentYear = new Date().getFullYear();
-          return currentYear - publicationYear;
-        };
-
-        // Loop through the books array and add the age property
-        books.forEach(book => {
-          book.age = calculateBookAge(book.pubDate);
-        });
-
-        books.forEach(book => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${book.title}</td>
-            <td>${book.author}</td>
-            <td>${book.isbn}</td>
-            <td>${book.pubDate}</td>
-            <td>${book.genre}</td>
-            <td>${book.age}</td>
-          `;
-          table.appendChild(row);
-        });
-  
-        bookListDiv.innerHTML = '';
-        bookListDiv.appendChild(table);
-      }
-    };
     
+  // const updateBookDisplay = () => {
+  //     bookCountDiv.textContent = `Number of books: ${books.length}`;
+  
+  //     if (books.length === 0) {
+  //       bookListDiv.textContent = 'No Results';
+  //     } else {
+  //       const table = document.createElement('table');
+  //       table.classList.add('min-w-full', 'table-auto', 'bg-white', 'shadow-lg', 'rounded-lg', 'overflow-hidden');
+        
+  //       const headerRow = document.createElement('tr');
+  //       headerRow.classList.add('bg-gray-200', 'text-left');
+  //       headerRow.innerHTML = `
+  //         <th class="px-4 py-2">Title</th>
+  //         <th class="px-4 py-2">Author</th>
+  //         <th class="px-4 py-2">ISBN</th>
+  //         <th class="px-4 py-2">Publication Date</th>
+  //         <th class="px-4 py-2">Genre</th>
+  //         <th class="px-4 py-2">Age</th>
+  //       `;
+  //       table.appendChild(headerRow);
+  
+  //       // Function to calculate the age of a book
+  //       const calculateBookAge = (pubDate) => {
+  //         const publicationYear = new Date(pubDate).getFullYear();
+  //         const currentYear = new Date().getFullYear();
+  //         return currentYear - publicationYear;
+  //       };
+
+  //       // Loop through the books array and add the age property
+  //       books.forEach(book => {
+  //         book.age = calculateBookAge(book.pubDate);
+  //       });
+
+  //       books.forEach(book => {
+  //         const row = document.createElement('tr');
+  //         row.classList.add('border-t', 'border-gray-200');
+  //         row.innerHTML = `
+  //           <td class="px-4 py-2">${book.title}</td>
+  //           <td class="px-4 py-2">${book.author}</td>
+  //           <td class="px-4 py-2">${book.isbn}</td>
+  //           <td class="px-4 py-2">${book.pubDate}</td>
+  //           <td class="px-4 py-2">${book.genre}</td>
+  //           <td class="px-4 py-2">${book.age}</td>
+  //         `;
+  //         table.appendChild(row);
+  //       });
+  
+  //       bookListDiv.innerHTML = '';
+  //       bookListDiv.appendChild(table);
+  //     }
+  //   };
+
+  const updateBookDisplay = () => {
+    bookCountDiv.textContent = `Number of books: ${books.length}`;
+  
+    if (books.length === 0) {
+      bookListDiv.textContent = 'No Results';
+    } else {
+      const table = document.createElement('table');
+      table.classList.add(
+        'min-w-full', 
+        'table-auto', 
+        'bg-white', 
+        'shadow-lg', 
+        'rounded-lg', 
+        'overflow-hidden', 
+        'block', 
+        'w-full', 
+        'overflow-x-auto', 
+        'sm:table'
+      );
+  
+      const headerRow = document.createElement('tr');
+      headerRow.classList.add('bg-gray-200', 'text-left');
+      headerRow.innerHTML = `
+        <th class="px-4 py-2">Title</th>
+        <th class="px-4 py-2">Author</th>
+        <th class="px-4 py-2">ISBN</th>
+        <th class="px-4 py-2">Publication Date</th>
+        <th class="px-4 py-2">Genre</th>
+        <th class="px-4 py-2">Age</th>
+      `;
+      table.appendChild(headerRow);
+  
+      // Function to calculate the age of a book
+      const calculateBookAge = (pubDate) => {
+        const publicationYear = new Date(pubDate).getFullYear();
+        const currentYear = new Date().getFullYear();
+        return currentYear - publicationYear;
+      };
+  
+      // Loop through the books array and add the age property
+      books.forEach((book) => {
+        book.age = calculateBookAge(book.pubDate);
+      });
+  
+      books.forEach((book) => {
+        const row = document.createElement('tr');
+        row.classList.add('border-t', 'border-gray-200');
+        row.innerHTML = `
+          <td class="px-4 py-2">${book.title}</td>
+          <td class="px-4 py-2">${book.author}</td>
+          <td class="px-4 py-2">${book.isbn}</td>
+          <td class="px-4 py-2">${book.pubDate}</td>
+          <td class="px-4 py-2">${book.genre}</td>
+          <td class="px-4 py-2">${book.age}</td>
+        `;
+        table.appendChild(row);
+      });
+  
+      bookListDiv.innerHTML = '';
+      bookListDiv.appendChild(table);
+    }
+  };
+  
+
+
+    // Sorting function
+    const sortBooks = (order) => {
+      toastr.success(`${order} order.`);
+      books.sort((a, b) => {
+        if (a.title.toLowerCase() < b.title.toLowerCase()) return order === 'asc' ? -1 : 1;
+        if (a.title.toLowerCase() > b.title.toLowerCase()) return order === 'asc' ? 1 : -1;
+        return 0;
+      });
+      updateBookDisplay();
+    };
+
+    // Event listeners for sort buttons
+    sortAscButton.addEventListener('click', () => sortBooks('asc'));
+    sortDescButton.addEventListener('click', () => sortBooks('desc'));
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
   
