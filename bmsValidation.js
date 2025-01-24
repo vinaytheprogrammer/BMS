@@ -34,9 +34,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const apiUrl = './books.json'; // Path to your JSON file
     
     let books = [];
-    
+
     const fetchBooks = async () => {
+      const loader = document.createElement('div');
+      loader.classList.add('fixed', 'top-0', 'left-0', 'w-full', 'h-screen', 'bg-black', 'bg-opacity-50', 'flex', 'justify-center', 'items-center', 'z-50');
+    
+      loader.innerHTML = `
+        <div class="flex items-center space-x-4">
+          <svg class="w-12 h-12 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <h1 class="text-white font-bold text-lg">Loading...</h1>
+        </div>
+      `;
+    
+      document.body.appendChild(loader);
+    
       try {
+        // Simulate a slower network request
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 seconds
+    
         const response = await fetch(apiUrl);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -47,6 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (error) {
         toastr.error('Error fetching books:', error);
         bookListDiv.textContent = 'Failed to load book data.';
+      } finally {
+        loader.remove();
       }
     };
 
@@ -89,10 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('searchTerm').value = '';
       document.getElementById('filterGenre').value = '';
       document.getElementById('filterYear').value = '';
-      toastr.success("reset successfully")
       fetchBooks();
-      books = [...books];
-      
+      setTimeout(() => {
+        toastr.success("reset successfully");
+      }, 1000);
       updateBookDisplay();
     };
     document.getElementById('resetFilters').addEventListener('click', resetFilters);
@@ -100,60 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchBooks();
 
 
-    
-  // const updateBookDisplay = () => {
-  //     bookCountDiv.textContent = `Number of books: ${books.length}`;
-  
-  //     if (books.length === 0) {
-  //       bookListDiv.textContent = 'No Results';
-  //     } else {
-  //       const table = document.createElement('table');
-  //       table.classList.add('min-w-full', 'table-auto', 'bg-white', 'shadow-lg', 'rounded-lg', 'overflow-hidden');
-        
-  //       const headerRow = document.createElement('tr');
-  //       headerRow.classList.add('bg-gray-200', 'text-left');
-  //       headerRow.innerHTML = `
-  //         <th class="px-4 py-2">Title</th>
-  //         <th class="px-4 py-2">Author</th>
-  //         <th class="px-4 py-2">ISBN</th>
-  //         <th class="px-4 py-2">Publication Date</th>
-  //         <th class="px-4 py-2">Genre</th>
-  //         <th class="px-4 py-2">Age</th>
-  //       `;
-  //       table.appendChild(headerRow);
-  
-  //       // Function to calculate the age of a book
-  //       const calculateBookAge = (pubDate) => {
-  //         const publicationYear = new Date(pubDate).getFullYear();
-  //         const currentYear = new Date().getFullYear();
-  //         return currentYear - publicationYear;
-  //       };
-
-  //       // Loop through the books array and add the age property
-  //       books.forEach(book => {
-  //         book.age = calculateBookAge(book.pubDate);
-  //       });
-
-  //       books.forEach(book => {
-  //         const row = document.createElement('tr');
-  //         row.classList.add('border-t', 'border-gray-200');
-  //         row.innerHTML = `
-  //           <td class="px-4 py-2">${book.title}</td>
-  //           <td class="px-4 py-2">${book.author}</td>
-  //           <td class="px-4 py-2">${book.isbn}</td>
-  //           <td class="px-4 py-2">${book.pubDate}</td>
-  //           <td class="px-4 py-2">${book.genre}</td>
-  //           <td class="px-4 py-2">${book.age}</td>
-  //         `;
-  //         table.appendChild(row);
-  //       });
-  
-  //       bookListDiv.innerHTML = '';
-  //       bookListDiv.appendChild(table);
-  //     }
-  //   };
-
-  const updateBookDisplay = () => {
+  const updateBookDispla = () => {
     bookCountDiv.textContent = `Number of books: ${books.length}`;
   
     if (books.length === 0) {
@@ -215,9 +182,112 @@ document.addEventListener('DOMContentLoaded', () => {
       bookListDiv.appendChild(table);
     }
   };
+  const updateBookDisplay = (currentPage = 1) => {
+    const booksPerPage = 10; // Number of books to display per page
   
-
-
+    // Calculate the starting and ending indices for the current page
+    const startIndex = (currentPage - 1) * booksPerPage;
+    const endIndex = Math.min(startIndex + booksPerPage, books.length);
+  
+    // Update book count display
+    bookCountDiv.textContent = `Number of books: ${books.length}`;
+  
+    // Clear previous content
+    bookListDiv.innerHTML = '';
+  
+    if (books.length === 0) {
+      bookListDiv.textContent = 'No Results';
+    } else {
+      const table = document.createElement('table');
+      table.classList.add(
+        'min-w-full',
+        'table-auto',
+        'bg-white',
+        'shadow-lg',
+        'rounded-lg',
+        'overflow-hidden',
+        'block',
+        'w-full',
+        'overflow-x-auto',
+        'sm:table'
+      );
+  
+      const headerRow = document.createElement('tr');
+      headerRow.classList.add('bg-gray-200', 'text-left');
+      headerRow.innerHTML = `
+        <th class="px-4 py-2">Title</th>
+        <th class="px-4 py-2">Author</th>
+        <th class="px-4 py-2">ISBN</th>
+        <th class="px-4 py-2">Publication Date</th>
+        <th class="px-4 py-2">Genre</th>
+        <th class="px-4 py-2">Age</th>
+      `;
+      table.appendChild(headerRow);
+  
+      // Function to calculate the age of a book
+      const calculateBookAge = (pubDate) => {
+        const publicationYear = new Date(pubDate).getFullYear();
+        const currentYear = new Date().getFullYear();
+        return currentYear - publicationYear;
+      };
+  
+      // Loop through the books for the current page and add rows
+      for (let i = startIndex; i < endIndex; i++) {
+        const book = books[i];
+        book.age = calculateBookAge(book.pubDate);
+  
+        const row = document.createElement('tr');
+        row.classList.add('border-t', 'border-gray-200');
+        row.innerHTML = `
+          <td class="px-4 py-2"><span class="math-inline">${book.title}</td\>
+  <td class\="px\-4 py\-2"\></span>${book.author}</td>
+          <td class="px-4 py-2"><span class="math-inline">${book.isbn}</td\>
+  <td class\="px\-4 py\-2"\></span>${book.pubDate}</td>
+          <td class="px-4 py-2"><span class="math-inline">${book.genre}</td\>
+  <td class\="px\-4 py\-2"\></span>${book.age}</td>
+        `;
+        table.appendChild(row);
+      }
+  
+      bookListDiv.appendChild(table);
+  
+      // Add pagination buttons (if there are more than one page)
+      if (books.length > booksPerPage) {
+        const paginationDiv = document.createElement('div');
+        paginationDiv.classList.add('flex', 'justify-center', 'mt-4');
+  
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.classList.add(
+          'px-4',
+          'py-2',
+          'bg-gray-200',
+          'hover:bg-gray-300',
+          'disabled:opacity-50',
+          'cursor-pointer'
+        );
+        prevButton.disabled = currentPage === 1;
+        prevButton.addEventListener('click', () => updateBookDisplay(currentPage - 1));
+        paginationDiv.appendChild(prevButton);
+  
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.classList.add(
+          'px-4',
+          'py-2',
+          'bg-gray-200',
+          'hover:bg-gray-300',
+          'disabled:opacity-50',
+          'cursor-pointer'
+        );
+        nextButton.disabled = currentPage === Math.ceil(books.length / booksPerPage);
+        nextButton.addEventListener('click', () => updateBookDisplay(currentPage + 1));
+        paginationDiv.appendChild(nextButton);
+  
+        bookListDiv.appendChild(paginationDiv);
+      }
+    }
+  };
     // Sorting function
     const sortBooks = (order) => {
       toastr.success(`${order} order.`);
